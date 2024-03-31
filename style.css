@@ -1,0 +1,187 @@
+body {
+    margin: 0;
+    padding: 0;
+    /* overflow: hidden; */
+    font-family: 'Roboto Mono', monospace;
+    background-color: #18453B;
+}
+
+.window {
+    width: 100vw;
+    height: 100vh;
+}
+
+.logo-container img {
+    filter: grayscale(100%) invert(100%) brightness(1000%);
+}
+
+.gotham {
+    font-family: Gotham, sans-serif;
+}
+
+.logo {
+    color: white;
+    margin: -2px 0;
+}
+
+.ide {
+    max-height: 100vh;
+}
+
+.pane {
+    flex-basis: 100%;
+}
+
+.sidebar::-webkit-scrollbar {
+    display: none;
+}
+
+.sidebar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+@media screen and (max-width: 768px) {
+    #sidebar-container {
+        /* display: none; */
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 1;
+        width: 80vw;
+        height: 100vh;
+        background-color: #18453B;
+    }
+
+    .slide-in {
+        transform: translateX(0);
+        transition: transform 0.2s;
+        box-shadow: 4px 0 4px 0 #00000044;
+    }
+
+    .slide-out {
+        transform: translateX(-100%);
+        transition: transform 0.2s;
+    }
+}
+
+.glass {
+    /* opacity: 0.9; */
+    /* backdrop-filter: blur(50px); */
+}
+
+#line-text {
+    outline: 0px solid transparent;
+    height: fit-content;
+    width: fit-content;
+    caret-color: white;
+}
+
+#output {
+    scrollbar-color: transparent darkgrey;
+}
+
+/* color_map = {
+    'COMMENT': (FG_CYAN, BG_WHITE, ""),
+    
+    'GOGREEN': (FG_GREEN, BG_WHITE, ""),
+    'GOWHITE': (FG_RESET, BG_WHITE, ""),
+    'SPARTYSAYS': (FG_GREEN, BG_WHITE, ""),
+    'SEMICOLON': (FG_RESET, BG_WHITE, ""),
+    
+    'AND': (FG_RED, BG_WHITE, ""),
+    'OR': (FG_RED, BG_WHITE, ""),
+    'NOT': (FG_RED, BG_WHITE, ""),
+    
+    'TRUE': (FG_MAGENTA, BG_WHITE, ""),
+    'FALSE': (FG_MAGENTA, BG_WHITE, ""),
+    
+    'IF': (FG_RED, BG_WHITE, ""),
+    'ELSE': (FG_RED, BG_WHITE, ""),
+    'WHILE': (FG_RED, BG_WHITE, ""),
+    
+    'FUNCTION': (FG_RED, BG_WHITE, ""),
+    'RETURN': (FG_RED, BG_WHITE, ""),
+    'CALL': (FG_GREEN, BG_WHITE, ""),
+    
+    'NVAR': (FG_BLUE, BG_WHITE, ""),
+    'SVAR': (FG_BLUE, BG_WHITE, ""),
+    'IDENTIFIER': (FG_YELLOW, BG_WHITE, ""),
+    'NUMBER': (FG_MAGENTA, BG_WHITE, ""),
+    'STRING': (FG_GREEN, BG_WHITE, ""),
+    
+    'PLUS': (FG_CYAN, BG_WHITE, ""),
+    'MINUS': (FG_CYAN, BG_WHITE, ""),
+    'MUL': (FG_CYAN, BG_WHITE, ""),
+    'DIV': (FG_CYAN, BG_WHITE, ""),
+    
+    'EQ': (FG_CYAN, BG_WHITE, ""),
+    'GREATEREQ': (FG_CYAN, BG_WHITE, ""),
+    'LESSEQ': (FG_CYAN, BG_WHITE, ""),
+    'LESS': (FG_CYAN, BG_WHITE, ""),
+    'GREATER': (FG_CYAN, BG_WHITE, ""),
+    'NOTEQ': (FG_CYAN, BG_WHITE, ""),
+    
+    'ASSIGNMENT': (FG_CYAN, BG_WHITE, ""),
+    'OPEN_PARENS': (FG_RESET, BG_WHITE, ""),
+    'CLOSE_PARENS': (FG_RESET, BG_WHITE, ""),
+    'COMMA': (FG_RESET, BG_WHITE, ""),
+    
+    'SPACE': (FG_RESET, BG_WHITE, ""),
+    'TAB': (FG_RESET, BG_WHITE, ""),
+    'NEWLINE': (FG_RESET, BG_WHITE, ""),
+    
+    'UNKNOWN': (FG_RESET, BG_WHITE, ""),
+} */
+
+:root {
+    --FG_BLACK: #000000;
+    --FG_RED: #DC3545;
+    --FG_GREEN: #28A745;
+    --FG_YELLOW: #FFC107;
+    --FG_BLUE: #0dcaf0;
+    --FG_MAGENTA: #c1429f;
+    --FG_CYAN: #17A2B8;
+    --FG_WHITE: #FFFFFF;
+    --FG_GRAY: #6C757D;
+}
+
+.token-gogreen, .token-spartysays, .token-call, .token-string {
+    color: var(--FG_GREEN);
+}
+
+.token-and, .token-or, .token-not, .token-if, .token-else, .token-while, .token-function, .token-return {
+    color: var(--FG_RED);
+}
+
+.token-true, .token-false, .token-number {
+    color: var(--FG_MAGENTA);
+}
+
+.token-identifier {
+    color: var(--FG_YELLOW);
+}
+
+.token-nvar, .token-svar {
+    color: var(--FG_BLUE);
+}
+
+.token-plus, .token-minus, .token-mul, .token-div, .token-eq, .token-greatereq, .token-lesseq, .token-less, .token-greater, .token-noteq {
+    color: var(--FG_CYAN);
+}
+
+.token-gowhite, .token-semicolon, .token-assignment, .token-open_parens, .token-close_parens, .token-comma, .token-newline, .token-unknown {
+    color: var(--FG_WHITE);
+}
+
+/*
+Highlight whitespace with a circle dot
+*/
+.token-space, .token-tab {
+    content: '•';
+    color: var(--FG_WHITE);
+}
+
+.token-comment {
+    color: var(--FG_GRAY);
+}
