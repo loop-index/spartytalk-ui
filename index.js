@@ -9,15 +9,15 @@ gogreen
     gowhite;
 
     // Function to draw a tree
-    // height: height of the tree
-    function tree(height) gogreen
+    // width: width of the tree
+    function tree(width) gogreen
         nvar level = 0;
         nvar spacing = 0;
         nvar _space = 0;
         
         // Loop through each level of the tree
-        while level < height gogreen
-            spacing = (height - 2 - level) / 2;
+        while level < width gogreen
+            spacing = (width - 2 - level) / 2;
             _space = spacing;
             
             // Draw whitespace before tree
@@ -31,7 +31,7 @@ gogreen
             // Draw whitespace inside tree
             _space = level;
             while _space > 0 gogreen
-                if level == height - 2 gogreen
+                if level == width - 2 gogreen
                     spartysays "_";
                 gowhite; else gogreen
                     spartysays " ";
@@ -53,7 +53,7 @@ gogreen
         gowhite;
         
         // Draw trunk
-        spacing = (height - 2) / 2;
+        spacing = (width - 2) / 2;
         _space = spacing;
         while _space > 0 gogreen
             spartysays " ";
