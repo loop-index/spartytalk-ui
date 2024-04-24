@@ -1,5 +1,5 @@
 // Socket connection
-const base_url = "http://localhost:5000/";
+const base_url = "/";
 var connected = false;
 const base_program = `// Program must be enclosed in gogreen and gowhite (or curly braces)
 gogreen
