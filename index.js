@@ -1,20 +1,80 @@
 // Socket connection
-const base_url = "http://localhost:5000";
+const base_url = "http://localhost:5000/";
 var connected = false;
-const base_program = `gogreen
-    nvar count = 10;
-    while count > 0 gogreen
-        spartysays count;
-        count = count - 1;
+const base_program = `// Program must be enclosed in gogreen and gowhite (or curly braces)
+gogreen
+    // Obligatory hello world function
+    function hello_world() gogreen
+        spartysays "Hello, World!\\n";
     gowhite;
+
+    // Function to draw a tree
+    // height: height of the tree
+    function tree(height) gogreen
+        nvar level = 0;
+        nvar spacing = 0;
+        nvar _space = 0;
+        
+        // Loop through each level of the tree
+        while level < height gogreen
+            spacing = (height - 2 - level) / 2;
+            _space = spacing;
+            
+            // Draw whitespace before tree
+            while _space > 0 gogreen
+                spartysays " ";
+                _space = _space - 1;
+            gowhite;
+            
+            spartysays "/";
+
+            // Draw whitespace inside tree
+            _space = level;
+            while _space > 0 gogreen
+                if level == height - 2 gogreen
+                    spartysays "_";
+                gowhite; else gogreen
+                    spartysays " ";
+                gowhite;
+                _space = _space - 1;
+            gowhite;
+            
+            spartysays "\\";
+
+            // Draw whitespace after tree
+            _space = spacing;
+            while _space > 0 gogreen
+                spartysays " ";
+                _space = _space - 1;
+            gowhite;
+            
+            level = level + 2;
+            spartysays "\\n";
+        gowhite;
+        
+        // Draw trunk
+        spacing = (height - 2) / 2;
+        _space = spacing;
+        while _space > 0 gogreen
+            spartysays " ";
+            _space = _space - 1;
+        gowhite;
+        spartysays "||";
+        _space = spacing;
+        while _space > 0 gogreen
+            spartysays " ";
+            _space = _space - 1;
+        gowhite;
+    gowhite;
+
+    call hello_world();
+    call tree(10);
 gowhite;
 `
+var timeoutID = null;
+const syntaxHighlightDelay = 200;
 
 $(document).ready(function() {
-    // Initialize text editor
-    $("#line-text").text(base_program);
-    updateLineNumber($("#line-text"));
-
     // Initialize socket connection
     let socket = io.connect(base_url);
     let sending = false;
@@ -27,7 +87,7 @@ $(document).ready(function() {
 
         $("#server-disconnected").addClass("d-none");
         $("#server-connected").removeClass("d-none");
-        syntaxHighlight($("#line-text"), base_program, 0);
+        socket.emit("parse", {code: base_program, caret_pos: 0})
     });
 
     socket.on("after_connect", function(data) {
@@ -44,46 +104,6 @@ $(document).ready(function() {
 
         $("#run-code").removeClass("fa-spinner fa-spin d-none").addClass("fa-play");
         $("#stop-code").removeClass("fa-spinner fa-spin").addClass("fa-stop d-none");
-    });
-
-    // Handler for sending code to server
-    $("#run-code").click(function() {
-        if (!connected) {
-            return;
-        }
-
-        // Send code to server
-        if (sending) {
-            sending = false;
-            $(this).removeClass("fa-spinner fa-spin").addClass("fa-play");
-        } else {
-            sending = true;
-            $(this).removeClass("fa-play").addClass("fa-spinner fa-spin");
-            $("#zsh-prompt").before(`
-                <span class="text-success">
-                    <i class="fa-solid fa-angle-right"></i>
-                    gogreen!
-                </span>
-            <br>`);
-
-            let code = $("#line-text").text();
-            socket.emit("run", {code: code});
-        }
-    });
-    
-    // Handler for stopping code execution
-    $("#stop-code").click(function() {
-        if (!connected) {
-            return;
-        }
-
-        if (!halting) {
-            socket.emit("halt", {message: "Stop execution"});
-            halting = true;
-            console.log("Program halted");
-            
-            $(this).removeClass("fa-stop").addClass("fa-spinner fa-spin");
-        }
     });
 
     // Handler for receiving output from server
@@ -104,7 +124,8 @@ $(document).ready(function() {
                 $("#zsh-prompt").before(`<span class="text-danger">${data["output"]["message"]}</span><br>`);
                 $("#run-code").removeClass("d-none");
             } else {
-                $("#zsh-prompt").before(`<span>${data["output"]["message"]}</span><br>`);
+                let text = data["output"]["message"].replace("\\n", "<br>").replace(" ", "&nbsp;");
+                $("#zsh-prompt").before(`<span>${text}</span>`);
             }
 
             $("#output").scrollTop($("#output")[0].scrollHeight);
@@ -116,7 +137,7 @@ $(document).ready(function() {
         console.log("Received end of output");
 
         if (data["message"] != "End of output") {
-            $("#zsh-prompt").before(`<span class="text-danger">${data["message"]}</span><br>`);
+            $("#zsh-prompt").before(`<br><span class="text-danger">${data["message"]}</span><br>`);
         }
 
         // Execution duration
@@ -137,71 +158,172 @@ $(document).ready(function() {
         }
     });
 
+    socket.on("highlight", function(data) {
+        let text = data["text"];
+
+        // Check if the text content is the same, if not text has been updated and we should wait for the next highlight call
+        if ($("#line-text").text() != text) {
+            return;
+        }
+
+        let caret_pos = data["caret_pos"];
+        let code = data["html"];
+        $("#line-text").html(code);
+        setCaretPosition($("#line-text")[0], caret_pos);
+    });
+
     // Initialize tooltips
     const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
     const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
-});
 
-// Sidebar
-$("#sidebar-toggle").click(function() {
-    $("#sidebar-container").toggleClass("slide-in").toggleClass("slide-out");
-});
-
-// Text editor
-$("#line-text").on("input", async function(e) {
-    // Update line number
-    updateLineNumber($(this));
-
-    if (!connected) {
-        return;
-    }
-
-    // Get current caret position
-    let caret_pos = await getCaretPosition($(this)[0]);
-    // console.log(caret_pos);
-
-    // Get token analysis
-    await syntaxHighlight($(this), $(this).text, caret_pos);
-});
-
-// Tab key
-$("#line-text").keydown(async function(e) {
-    if (e.keyCode == 9) {
-        e.preventDefault();
-        let text = $(this).text();
-        let caret_pos = await getCaretPosition($(this)[0]);
-
-        // Insert tab
-        let text_before = text.substring(0, caret_pos);
-        let text_after = text.substring(caret_pos);
-        let new_text = text_before + "    " + text_after;
-
-        // Get token analysis
-        await syntaxHighlight($(this), new_text, caret_pos + 4);
-    }
-});
-
-// Clear terminal
-$("#clear-terminal").click(function() {
-    $("#zsh-prompt").siblings().remove();
-});
-
-// Syntax highlight
-async function syntaxHighlight(elem, text, caret_pos=0) {
-    await fetch("http://127.0.0.1:5000/parse", {
-        method: "POST",
-        body: JSON.stringify({text: text}),
-        headers: {
-            "Content-Type": "application/json"
-        }
-    }).then(response => response.text()).then(async data => {
-        // console.log(data);
-        await $(elem).html(data);
-
-        // Restore caret position
-        setCaretPosition($(elem)[0], caret_pos);
+    // Sidebar
+    $("#sidebar-toggle").click(function() {
+        $("#sidebar-container").toggleClass("slide-in").toggleClass("slide-out");
     });
-}
+
+    // Handler for sending code to server
+    $("#run-code").click(function() {
+        if (!connected) {
+            return;
+        }
+
+        // Send code to server
+        if (sending) {
+            sending = false;
+            $(this).removeClass("fa-spinner fa-spin").addClass("fa-play");
+        } else {
+            sending = true;
+            $(this).removeClass("fa-play").addClass("fa-spinner fa-spin");
+            $("#zsh-prompt").before(`
+                <br>
+                <span class="text-success">
+                    <i class="fa-solid fa-angle-right"></i>
+                    gogreen!
+                </span>
+            <br>`);
+
+            let code = $("#line-text").text();
+            socket.emit("run", {code: code});
+        }
+    });
+
+    // Handler for stopping code execution
+    $("#stop-code").click(function() {
+        if (!connected) {
+            return;
+        }
+
+        if (!halting) {
+            socket.emit("halt", {message: "Stop execution"});
+            halting = true;
+            console.log("Program halted");
+
+            $(this).removeClass("fa-stop").addClass("fa-spinner fa-spin");
+        }
+    });
+
+    // Initialize text editor
+    $("#line-text").text(base_program);
+    updateLineNumber($("#line-text"));
+
+    // Text editor
+    $("#line-text").on("input", async function(e) {
+        // Clear timeout
+        clearTimeout(timeoutID);
+
+        // Update line number
+        updateLineNumber($(this));
+
+        if (!connected) {
+            return;
+        }
+
+        // Get current caret position
+        let caret_data = await getCaretPosition($(this)[0]);
+        let caret_pos = caret_data.raw;
+
+        // Syntax highlight after a delay to prevent multiple requests
+        let that = this;
+        timeoutID = setTimeout(async function() {
+            let text = $(that).text();
+            socket.emit("parse", {code: text, caret_pos: caret_pos});
+        }, syntaxHighlightDelay);
+    });
+
+    // Special keys
+    $("#line-text").keydown(async function(e) {
+
+        // Tab
+        if (e.keyCode == 9) {
+            // Prevent default tab action
+            e.preventDefault();
+
+            // Clear timeout
+            clearTimeout(timeoutID);
+
+            // If user is not selecting text, insert tab at caret
+            let selection = window.getSelection();
+            if (selection.type != "Range") {
+
+                // Get current caret position
+                let text = $(this).text();
+                let caret_data = await getCaretPosition($(this)[0]);
+                let caret_pos = caret_data.raw;
+
+                // Insert tab
+                await insertAtCaret($(this)[0], "    ");
+                let new_text = $(this).text();
+
+                // Syntax highlight after a delay to prevent multiple requests
+                timeoutID = setTimeout(async function() {
+                    socket.emit("parse", {code: new_text, caret_pos: caret_pos + 4});
+                }, syntaxHighlightDelay);
+            }
+        }
+
+        // Enter
+        else if (e.keyCode == 13) {
+            e.preventDefault();
+
+            // Clear timeout
+            clearTimeout(timeoutID);
+
+            // Get current line
+            let text = $(this).text();
+            let caret_data = await getCaretPosition($(this)[0]);
+            let caret_pos = caret_data.raw;
+            let line_no = caret_data.line;
+            let line_text = text.split("\n")[line_no - 1];
+
+            // Get indentation
+            let indentation = line_text.match(/^\s*/)[0];
+
+            // Insert newline with indentation
+            await insertAtCaret($(this)[0], "\n" + indentation);
+            updateLineNumber($(this));
+            let new_text = $(this).text();
+
+            // Prompt caret position
+            getCaretPosition($(this)[0]);
+
+            // Syntax highlight after a delay to prevent multiple requests
+            timeoutID = setTimeout(async function() {
+                socket.emit("parse", {code: new_text, caret_pos: caret_pos + indentation.length + 1});
+            }, syntaxHighlightDelay);
+        }
+    });
+
+    // Click on text editor
+    $("#line-text").click(async function(e) {
+        // Prompt caret position
+        getCaretPosition($(this)[0]);
+    });
+
+    // Clear terminal
+    $("#clear-terminal").click(function() {
+        $("#zsh-prompt").siblings().remove();
+    });
+});
 
 // Update line number
 function updateLineNumber(elem) {
@@ -219,21 +341,48 @@ function updateLineNumber(elem) {
 
 // Get caret position
 async function getCaretPosition(target) {
-    if (target.isContentEditable || document.designMode === "on") { 
-        target.focus(); 
-        const _range = document.getSelection().getRangeAt(0); 
-        if (!_range.collapsed) { 
-            return null; 
-        } 
-        const range = _range.cloneRange(); 
-        const temp = document.createTextNode("\0"); 
-        range.insertNode(temp); 
-        const caretposition = target.innerText.indexOf("\0"); 
-        temp.parentNode.removeChild(temp); 
-        return caretposition; 
-   }
+    if (target.isContentEditable || document.designMode === "on") {
+        target.focus();
+        const _range = document.getSelection().getRangeAt(0);
+        if (!_range.collapsed) {
+            return null;
+        }
+        const range = _range.cloneRange();
+        const temp = document.createTextNode("\0");
+        range.insertNode(temp);
+        const caretposition = target.innerText.indexOf("\0");
+        const lines = target.innerText.substring(0, caretposition).split("\n");
+        const line_no = lines.length;
+        const col_no = lines[lines.length - 1].length;
+        temp.parentNode.removeChild(temp);
+
+        // Update line numbers
+        $("#editor-info").text(`line: ${line_no} column: ${col_no + 1}`);
+        return {raw: caretposition, line: line_no, col: col_no};
+    }
 }
 
+// Insert at caret position
+async function insertAtCaret(target, content) {
+    if (target.isContentEditable || document.designMode === "on") {
+        target.focus();
+        const _range = document.getSelection().getRangeAt(0);
+        if (!_range.collapsed) {
+            return null;
+        }
+
+        const temp = document.createTextNode(content);
+        _range.insertNode(temp);
+        _range.setStartAfter(temp);
+        _range.setEndAfter(temp);
+        document.getSelection().removeAllRanges();
+        document.getSelection().addRange(_range);
+
+        return true;
+    }
+}
+
+// Set caret position
 function setCaretPosition(target, offset) {
     if (target.isContentEditable || document.designMode === "on") {
         var range = document.createRange();

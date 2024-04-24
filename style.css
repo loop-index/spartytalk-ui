@@ -1,8 +1,10 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap');
+
 body {
     margin: 0;
     padding: 0;
     /* overflow: hidden; */
-    font-family: 'Roboto Mono', monospace;
+    font-family: 'JetBrains Mono', monospace;
     background-color: #18453B;
 }
 
@@ -75,10 +77,17 @@ body {
     height: fit-content;
     width: fit-content;
     caret-color: white;
+
+    -ms-overflow-style: none;
+    scrollbar-width: none;
 }
 
-#output {
-    scrollbar-color: transparent darkgrey;
+.text-editor::-webkit-scrollbar, #output::-webkit-scrollbar {
+    background-color: #343a40;
+}
+
+.text-editor::-webkit-scrollbar-thumb, #output::-webkit-scrollbar-thumb {
+    background-color: #6c757d;
 }
 
 /* color_map = {
@@ -146,7 +155,7 @@ body {
     --FG_GRAY: #6C757D;
 }
 
-.token-gogreen, .token-spartysays, .token-call, .token-string {
+.token-gogreen, .token-spartysays, .token-call {
     color: var(--FG_GREEN);
 }
 
@@ -154,7 +163,7 @@ body {
     color: var(--FG_RED);
 }
 
-.token-true, .token-false, .token-number {
+.token-true, .token-false, .token-number, .token-string {
     color: var(--FG_MAGENTA);
 }
 

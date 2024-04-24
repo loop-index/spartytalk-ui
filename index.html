@@ -345,7 +345,7 @@
                 </div>
                 <div class="col-lg-9 h-100 col-md-8 col-sm-12">
                     <div class="ide h-100 d-flex flex-lg-row flex-column">
-                        <div class="pane p-2 flex-grow-1 overflow-hidden">
+                        <div class="pane p-2 overflow-hidden" id="editor-pane">
                             <div class="editor glass h-100 bg-dark rounded d-flex flex-column">
                                 <div class="p-2 row">
                                     <small class="col-4 text-start">
@@ -368,7 +368,7 @@
                                             id="server-disconnected"></i>
                                     </small>
                                 </div>
-                                <div class="text-editor px-3 pb-3 overflow-y-auto">
+                                <div class="text-editor px-3 pb-3 overflow-y-auto flex-grow-1">
                                     <span id="line" class="text-light d-flex">
                                         <span id="line-number" class="text-end text-secondary w-auto me-2">
                                             1
@@ -377,9 +377,17 @@
                                             contenteditable="plaintext-only"></div>
                                     </span>
                                 </div>
+                                <div class="text-editor-footer px-3 pb-2">
+                                    <small>
+                                        <span class="text-secondary">
+                                            <i class="fa-solid fa-info-circle"></i>
+                                            <span id="editor-info">line: 0 col: 0</span>
+                                        </span>
+                                    </small>
+                                </div>
                             </div>
                         </div>
-                        <div class="pane p-2 flex-grow-1 overflow-hidden">
+                        <div class="pane p-2 overflow-hidden" id="terminal-pane">
                             <div class="terminal glass h-100 bg-dark rounded d-flex flex-column">
                                 <div class="p-2 row">
                                     <small class="col-4 text-start">
