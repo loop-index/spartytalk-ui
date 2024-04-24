@@ -1,75 +1,73 @@
 // Socket connection
 const base_url = "/";
+// const base_url = "http://localhost:5000";
 var connected = false;
-const base_program = `// Program must be enclosed in gogreen and gowhite (or curly braces)
-gogreen
-    // Obligatory hello world function
-    function hello_world() gogreen
-        spartysays "Hello, World!\\n";
-    gowhite;
-
-    // Function to draw a tree
-    // width: width of the tree
-    function tree(width) gogreen
-        nvar level = 0;
-        nvar spacing = 0;
-        nvar _space = 0;
-        
-        // Loop through each level of the tree
-        while level < width gogreen
-            spacing = (width - 2 - level) / 2;
-            _space = spacing;
-            
-            // Draw whitespace before tree
-            while _space > 0 gogreen
-                spartysays " ";
-                _space = _space - 1;
-            gowhite;
-            
-            spartysays "/";
-
-            // Draw whitespace inside tree
-            _space = level;
-            while _space > 0 gogreen
-                if level == width - 2 gogreen
-                    spartysays "_";
-                gowhite; else gogreen
-                    spartysays " ";
-                gowhite;
-                _space = _space - 1;
-            gowhite;
-            
-            spartysays "\\";
-
-            // Draw whitespace after tree
-            _space = spacing;
-            while _space > 0 gogreen
-                spartysays " ";
-                _space = _space - 1;
-            gowhite;
-            
-            level = level + 2;
-            spartysays "\\n";
-        gowhite;
-        
-        // Draw trunk
-        spacing = (width - 2) / 2;
-        _space = spacing;
-        while _space > 0 gogreen
-            spartysays " ";
-            _space = _space - 1;
-        gowhite;
-        spartysays "||";
-        _space = spacing;
-        while _space > 0 gogreen
-            spartysays " ";
-            _space = _space - 1;
-        gowhite;
-    gowhite;
-
-    call hello_world();
-    call tree(10);
+const base_program = `// Obligatory hello world function
+function hello_world() gogreen
+    spartysays "Hello, World!\\n";
 gowhite;
+
+// Function to draw a tree
+// width: width of the tree
+function tree(width) gogreen
+    nvar level = 0;
+    nvar spacing = 0;
+    nvar _space = 0;
+    
+    // Loop through each level of the tree
+    while level < width gogreen
+        spacing = (width - 2 - level) / 2;
+        _space = spacing;
+        
+        // Draw whitespace before tree
+        while _space > 0 gogreen
+            spartysays " ";
+            _space = _space - 1;
+        gowhite;
+        
+        spartysays "/";
+
+        // Draw whitespace inside tree
+        _space = level;
+        while _space > 0 gogreen
+            if level == width - 2 gogreen
+                spartysays "_";
+            gowhite; else gogreen
+                spartysays " ";
+            gowhite;
+            _space = _space - 1;
+        gowhite;
+        
+        spartysays "\\";
+
+        // Draw whitespace after tree
+        _space = spacing;
+        while _space > 0 gogreen
+            spartysays " ";
+            _space = _space - 1;
+        gowhite;
+        
+        level = level + 2;
+        spartysays "\\n";
+    gowhite;
+    
+    // Draw trunk
+    spacing = (width - 2) / 2;
+    _space = spacing;
+    while _space > 0 gogreen
+        spartysays " ";
+        _space = _space - 1;
+    gowhite;
+    spartysays "||";
+    _space = spacing;
+    while _space > 0 gogreen
+        spartysays " ";
+        _space = _space - 1;
+    gowhite;
+gowhite;
+
+call hello_world();
+call tree(10);
 `
 var timeoutID = null;
 const syntaxHighlightDelay = 200;
