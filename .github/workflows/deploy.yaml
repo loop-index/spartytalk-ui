@@ -3,7 +3,7 @@ name: Deploy to Home Server
 on:
   push:
     branches:
-      - main
+      - main  # Triggers on push to main branch
 
 jobs:
   deploy:
@@ -16,8 +16,18 @@ jobs:
     - name: Install SSH key
       uses: webfactory/ssh-agent@v0.5.3
       with:
-        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}  # Add your SSH key in GitHub secrets
+        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+    # Test SSH connection
+    - name: Test SSH connection
+      run: ssh -o StrictHostKeyChecking=no duong@ssh.loop-index.com "echo SSH connection successful"
 
     - name: Deploy to server
       run: |
-        ssh duong@ssh.loop-index.com 'cd ~/Code/python/spartytalk/spartytalk-ui && git pull origin main && cd .. && docker-compose down && docker-compose up -d --build'
+        ssh -o StrictHostKeyChecking=no duong@ssh.loop-index.com '
+          cd ~/Code/python/spartytalk/spartytalk-ui &&
+          git pull origin main &&
+          cd .. &&
+          docker-compose down &&
+          docker-compose up -d --build
+        '
