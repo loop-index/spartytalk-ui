@@ -221,6 +221,8 @@ $(document).ready(function() {
     });
 
     // Initialize text editor
+    base_program = base_program.replace(/\n/g, "<br>");
+
     $("#line-text").text(base_program);
     updateLineNumber($("#line-text"));
 
